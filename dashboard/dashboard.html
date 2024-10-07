@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Your Stock Portfolio</h2>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Symbol</th>
+                <th scope="col">Name</th>
+                <th scope="col">Current Price</th>
+                <th scope="col">Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <td>{{ stock.symbol }}</td>
+                <td>{{ stock.name }}</td>
+                <td>${{ stock.current_price }}</td>
+                <td>{{ stock.last_updated }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Total Portfolio Value: ${{ total_value }}</h3>
+    <p>Total Stocks: {{ total_stocks }}</p>
+</div>
+{% endblock %}

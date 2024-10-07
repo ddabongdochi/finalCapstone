@@ -1,0 +1,14 @@
+<!-- templates/dashboard/error.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오류 발생</title>
+</head>
+<body>
+    <h1>오류 발생</h1>
+    <p>문제가 발생했습니다: {{ error }}</p>
+    <a href="{% url 'dashboard' %}">대시보드로 돌아가기</a>
+</body>
+</html>
