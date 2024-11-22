@@ -1,5 +1,5 @@
 from django.shortcuts import render
-import requests
+import yfinance as yf
 from datetime import datetime, timedelta
 import pytz
 import torch
@@ -10,62 +10,43 @@ from torch.autograd import Variable
 # 한국 시간대 설정
 korea_tz = pytz.timezone('Asia/Seoul')
 
-
-# Alpha Vantage API로 시퀀스 데이터 가져오기
+# Yahoo Finance API로 실제 주가 가져오기
 def get_actual_price(symbol):
-    API_KEY = "U2UVDVWQ8ANZFDTW"
-    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=1min&apikey={API_KEY}"
+    stock = yf.Ticker(symbol)
+    hist = stock.history(period="1d", interval="1m")  # 1분 단위로 오늘 날짜의 데이터를 가져옵니다.
 
-    # Alpha Vantage API에서 데이터를 요청
-    response = requests.get(url)
-    data = response.json()
-
-    if "Time Series (1min)" in data:
-        # 타임스탬프가 최신 순서로 나열되므로, 가장 최신의 데이터를 가져옴
-        latest_time = list(data["Time Series (1min)"].keys())[0]
-        latest_data = data["Time Series (1min)"][latest_time]
-
-        # 가장 최근의 종가를 추출
-        actual_price = float(latest_data["4. close"])
-        return actual_price
+    if not hist.empty:
+        actual_price = hist['Close'].iloc[-1]  # 가장 최신 종가를 가져옵니다.
+        return float(actual_price)
     else:
-        # 데이터가 없을 경우, 실패 메시지 반환
         return None
 
-
-# Alpha Vantage API로 시퀀스 데이터 가져오기
+# Yahoo Finance API로 시퀀스 데이터 가져오기
 def get_sequence_data(symbol):
-    API_KEY = "U2UVDVWQ8ANZFDTW"
-    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={API_KEY}"
-    response = requests.get(url)
-    data = response.json()
+    stock = yf.Ticker(symbol)
+    hist = stock.history(period="5d", interval="5m")  # 5일간의 5분 단위 데이터를 가져옵니다.
 
-    if "Time Series (5min)" in data:
-        sequence_data = []
-        for time in data["Time Series (5min)"]:
-            close_price = data["Time Series (5min)"][time]["4. close"]
-            sequence_data.append(float(close_price))
+    if not hist.empty:
+        sequence_data = hist['Close'].tolist()
         return sequence_data
     else:
         return None
 
-
-# LSTM 모델 정의
-class LSTM(nn.Module):
+# Bidirectional LSTM 모델 정의
+class BiLSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, dropout=0.2):
-        super(LSTM, self).__init__()
+        super(BiLSTM, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, dropout=dropout)
-        self.fc = nn.Linear(hidden_size, 1)
+        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, dropout=dropout, bidirectional=True)
+        self.fc = nn.Linear(hidden_size * 2, 1)  # 양방향 출력을 고려하여 hidden_size 두 배로 설정
 
     def forward(self, x):
-        h_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.hidden_size))
-        c_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.hidden_size))
+        h_0 = Variable(torch.zeros(self.num_layers * 2, x.size(0), self.hidden_size))  # * 2 for bidirection
+        c_0 = Variable(torch.zeros(self.num_layers * 2, x.size(0), self.hidden_size))  # * 2 for bidirection
         output, (hn, _) = self.lstm(x, (h_0, c_0))
-        out = self.fc(hn[-1])
+        out = self.fc(torch.cat((hn[-2], hn[-1]), dim=1))  # 양방향 마지막 상태 결합
         return out
-
 
 def predict_stock_price(request):
     if request.method == 'POST':
@@ -103,7 +84,7 @@ def predict_stock_price(request):
         input_size = 1
         hidden_size = 50
         num_layers = 2
-        model = LSTM(input_size, hidden_size, num_layers)
+        model = BiLSTM(input_size, hidden_size, num_layers)
 
         if len(X_tensors) > 0:
             future_X = X_tensors[-1].view(1, sequence_length, -1)
