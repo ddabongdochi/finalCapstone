@@ -660,9 +660,9 @@
             width: 100% !important;
         }
 
-        .col-md-9, 
-        .col-lg-10, 
-        .col-md-3, 
+        .col-md-9,
+        .col-lg-10,
+        .col-md-3,
         .col-lg-2,
         main {
             padding-left: 0 !important;
@@ -793,21 +793,21 @@
             <nav id="sidebar">
                 <div class="sidebar-content">
                     {% if user.is_authenticated %}
-                    <div class="user-profile-section">
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                {{ user.username|make_list|first|upper }}
-                            </div>
-                            <div>
-                                <span class="user-name">{{ user.username }}</span>
-                                <a href="{% url 'logout' %}" class="logout-btn d-block">
-                                    <i class="bi bi-box-arrow-right"></i> 로그아웃
-                                </a>
+                        <div class="user-profile-section">
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    {{ user.username|make_list|first|upper }}
+                                </div>
+                                <div>
+                                    <span class="user-name">{{ user.username }}</span>
+                                    <a href="{% url 'logout' %}" class="logout-btn d-block">
+                                        <i class="bi bi-box-arrow-right"></i> 로그아웃
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     {% endif %}
-                    
+
                     <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link active" href="#" onclick="location.reload(); return false;">
@@ -878,8 +878,8 @@
                                               class="card text-white bg-danger mb-3" {% endif %}>
                             <div class="card-body">
                                 <h5 class="card-title">PnL</h5>
-                                <p class="card-text display-6">{% if PnL > 0 %} +{{ PnL|floatformat:0 |intcomma}}
-                                    KRW{% else %} {{ PnL|floatformat:0 |intcomma}} KRW  {% endif %}   </p>
+                                <p class="card-text display-6">{% if PnL > 0 %} +{{ PnL|floatformat:0 |intcomma }}
+                                    KRW{% else %} {{ PnL|floatformat:0 |intcomma }} KRW  {% endif %}   </p>
                             </div>
                         </div>
                     </div>
@@ -905,6 +905,7 @@
                                 <tr>
                                     <th>Symbol</th>
                                     <th>Name</th>
+                                    <th>Community</th>
                                     <th>Country</th>
                                     <th>Exchange Code</th>
                                     <th>Market Name</th>
@@ -919,7 +920,15 @@
                                     <tr>
                                         <td>{{ stock.symbol }}</td>
                                         <td><a href="#" class="stock-link text-light"
-                                               data-symbol="{{ stock.symbol }}">{{ stock.name }}</a></td>
+                                               data-symbol="{{ stock.symbol }}">{{ stock.name }}</a>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-outline-primary message-btn"
+                                                    data-symbol="{{ stock.symbol }}"
+                                                    data-name="{{ stock.name }}">
+                                                <i class="bi bi-chat-dots"></i> 메시지
+                                            </button>
+                                        </td>
                                         <td>{{ stock.country }}</td>
                                         <td>{{ stock.exchange_code }}</td>
                                         <td>{{ stock.market_name }}</td>
@@ -947,33 +956,34 @@
                                     <h5 class="mb-0">소비자물가지수 (CPI)</h5>
                                     <small class="text-muted">Consumer Price Index - 물가상승률을 나타내는 경제지표</small>
                                 </div>
-                                <i class="bi bi-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                <i class="bi bi-info-circle" data-bs-toggle="tooltip" data-bs-placement="top"
                                    title="CPI는 소비자들이 구매하는 제품과 서비스의 가격 변동을 측정하는 지표입니다. 인플레이션을 판단하는 중요한 경제지표입니다."></i>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-dark table-hover table-sm">
                                         <thead class="table-dark">
-                                            <tr>
-                                                <th>발표일</th>
-                                                <th>시간</th>
-                                                <th>실 <i class="bi bi-arrow-right-short"></i></th>
-                                                <th>예측</th>
-                                                <th>이전</th>
-                                            </tr>
+                                        <tr>
+                                            <th>발표일</th>
+                                            <th>시간</th>
+                                            <th>실 <i class="bi bi-arrow-right-short"></i></th>
+                                            <th>예측</th>
+                                            <th>이전</th>
+                                        </tr>
                                         </thead>
                                         <tbody>
-                                            {% for item in cpi_data %}
+                                        {% for item in cpi_data %}
                                             <tr>
                                                 <td><strong>{{ item.publish_date }}</strong></td>
                                                 <td>{{ item.time }}</td>
-                                                <td class="fw-bold" style="color: {% if item.actual > item.forecast %}#34C759{% elif item.actual < item.forecast %}#FF3B30{% else %}#ffffff{% endif %}">
+                                                <td class="fw-bold"
+                                                    style="color: {% if item.actual > item.forecast %}#34C759{% elif item.actual < item.forecast %}#FF3B30{% else %}#ffffff{% endif %}">
                                                     {{ item.actual }}
                                                 </td>
                                                 <td>{{ item.forecast }}</td>
                                                 <td>{{ item.previous }}</td>
                                             </tr>
-                                            {% endfor %}
+                                        {% endfor %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -989,33 +999,34 @@
                                     <h5 class="mb-0">생산자물가지수 (PPI)</h5>
                                     <small class="text-muted">Producer Price Index - 생산단계의 물가동향을 나타내는 지표</small>
                                 </div>
-                                <i class="bi bi-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                <i class="bi bi-info-circle" data-bs-toggle="tooltip" data-bs-placement="top"
                                    title="PPI는 생산자가 생산하는 제품의 가격 변동을 측정하는 지표입니다. 향후 소비자물가 변동을 예측하는데 도움이 됩니다."></i>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-dark table-hover table-sm">
                                         <thead class="table-dark">
-                                            <tr>
-                                                <th>발표일</th>
-                                                <th>시간</th>
-                                                <th>실제 <i class="bi bi-arrow-right-short"></i></th>
-                                                <th>예측</th>
-                                                <th>이전</th>
-                                            </tr>
+                                        <tr>
+                                            <th>발표일</th>
+                                            <th>시간</th>
+                                            <th>실제 <i class="bi bi-arrow-right-short"></i></th>
+                                            <th>예측</th>
+                                            <th>이전</th>
+                                        </tr>
                                         </thead>
                                         <tbody>
-                                            {% for item in ppi_data %}
+                                        {% for item in ppi_data %}
                                             <tr>
                                                 <td><strong>{{ item.publish_date }}</strong></td>
                                                 <td>{{ item.time }}</td>
-                                                <td class="fw-bold" style="color: {% if item.actual > item.forecast %}#34C759{% elif item.actual < item.forecast %}#FF3B30{% else %}#ffffff{% endif %}">
+                                                <td class="fw-bold"
+                                                    style="color: {% if item.actual > item.forecast %}#34C759{% elif item.actual < item.forecast %}#FF3B30{% else %}#ffffff{% endif %}">
                                                     {{ item.actual }}
                                                 </td>
                                                 <td>{{ item.forecast }}</td>
                                                 <td>{{ item.previous }}</td>
                                             </tr>
-                                            {% endfor %}
+                                        {% endfor %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -1044,6 +1055,24 @@
                 <!-- TradingView Widget Script -->
                 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
                 <script>
+                    //종목 토론방으로 이동
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const messageButtons = document.querySelectorAll('.message-btn');
+
+                        messageButtons.forEach(button => {
+                            button.addEventListener('click', function () {
+                                const stockSymbol = button.getAttribute('data-symbol');
+                                const stockName = button.getAttribute('data-name');
+
+                                // 토론방 페이지로 이동
+                                const communityUrl = `{% url 'community' %}?symbol=${stockSymbol}&name=${stockName}`;
+                                window.location.href = communityUrl;
+                            });
+                        });
+                    });
+                    
+                    
+                    
                     document.addEventListener('DOMContentLoaded', function () {
                         const stockLinks = document.querySelectorAll('.stock-link');
                         const modal = new bootstrap.Modal(document.getElementById('tradingViewModal'));
@@ -1080,16 +1109,16 @@
 
                 <!-- Add this script at the end of the file -->
                 <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-                    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                        return new bootstrap.Tooltip(tooltipTriggerEl)
-                    })
-                });
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                            return new bootstrap.Tooltip(tooltipTriggerEl)
+                        })
+                    });
                 </script>
 
                 <script>
-                    document.addEventListener('DOMContentLoaded', function() {
+                    document.addEventListener('DOMContentLoaded', function () {
                         const sidebar = document.getElementById('sidebar');
                         const toggle = document.querySelector('.sidebar-toggle');
                         const overlay = document.querySelector('.sidebar-overlay');
@@ -1108,7 +1137,7 @@
                             toggle.classList.remove('active');
                         }
 
-                        toggle.addEventListener('click', function(e) {
+                        toggle.addEventListener('click', function (e) {
                             e.stopPropagation();
                             if (sidebar.classList.contains('show')) {
                                 hideSidebar();
@@ -1119,15 +1148,15 @@
 
                         overlay.addEventListener('click', hideSidebar);
 
-                        sidebar.addEventListener('mouseleave', function() {
+                        sidebar.addEventListener('mouseleave', function () {
                             autoHideTimer = setTimeout(hideSidebar, 3000);
                         });
 
-                        sidebar.addEventListener('mouseenter', function() {
+                        sidebar.addEventListener('mouseenter', function () {
                             clearTimeout(autoHideTimer);
                         });
 
-                        document.addEventListener('keydown', function(e) {
+                        document.addEventListener('keydown', function (e) {
                             if (e.key === 'Escape') {
                                 hideSidebar();
                             }
