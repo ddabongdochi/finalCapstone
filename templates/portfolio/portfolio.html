@@ -981,9 +981,44 @@
                             <div class="tab-pane fade" id="trading-log" role="tabpanel"
                                  aria-labelledby="trading-log-tab">
                                 <div class="text-center text-muted">
-                                    <p>매매일지 작업 끝나면 이부분 뉴스 탭처럼 else 문으로 "현재 표시할 매매일지가 없습니다." 표기 부탁해요~</p>
+                                    {% if trading_logs|length == 0 %}
+                                        <p>현재 표시할 매매일지가 없습니다.</p>
+                                    {% else %}
+                                        <div class="card-deck">
+                                            {% for log in trading_logs %}
+                                                <div class="card" style="width: 18rem; margin-bottom: 1rem;">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title">{{ log.symbol }} - {{ log.name }}</h5>
+                                                        <p class="card-text">
+                                                            <strong>매매 종류:</strong>
+                                                            {% if log.ai_trade %}
+                                                                <span class="badge bg-primary" data-bs-toggle="tooltip"
+                                                                      data-bs-placement="right" title="AI 분석 기반 추천 종목">
+                                        <i class="bi bi-robot"></i> AI
+                                    </span>
+                                                            {% else %}
+                                                                <span class="badge bg-secondary"
+                                                                      data-bs-toggle="tooltip" data-bs-placement="right"
+                                                                      title="직접 매수한 종목">
+                                        <i class="bi bi-person"></i> Manual
+                                    </span>
+                                                            {% endif %}
+                                                            <br>
+                                                            <strong>매수/매도:</strong> {{ log.buy_sell }}
+                                                            <br>
+                                                            <strong>수량:</strong> {{ log.quantity }}
+                                                            <br>
+                                                            <strong>날짜/시간:</strong> {{ log.timestamp|date:"Y-m-d H:i:s" }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
+
+
                         </div>
                     </div>
                 </div>

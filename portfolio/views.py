@@ -289,15 +289,15 @@ def portfolio(request):
     return render(request, 'portfolio/portfolio.html', context)
 
 
-@login_required
-def update_trading_memo(request, log_id):
-    if request.method == 'POST':
-        memo = request.POST.get('memo')
-        trading_log = TradingLog.objects.get(id=log_id)
-        trading_log.memo = memo
-        trading_log.save()
-        return JsonResponse({'status': 'success'})
-    return JsonResponse({'status': 'error'})
+# @login_required
+# def update_trading_memo(request, log_id):
+#     if request.method == 'POST':
+#         memo = request.POST.get('memo')
+#         trading_log = TradingLog.objects.get(id=log_id)
+#         trading_log.memo = memo
+#         trading_log.save()
+#         return JsonResponse({'status': 'success'})
+#     return JsonResponse({'status': 'error'})
 
 
 def get_company_logo(symbol):
@@ -376,3 +376,37 @@ def fetch_portfolio_news(request):
     response['Cache-Control'] = 'no-cache'
     response['X-Accel-Buffering'] = 'no'
     return response
+
+
+@login_required
+def trading_log_view(request):
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        # KoreaInvestment 인스턴스 생성
+        broker = mojito.KoreaInvestment(
+            api_key=user_profile.api_key,
+            api_secret=user_profile.api_secret,
+            acc_no=user_profile.acc_num,
+            exchange='나스닥',
+            mock=True
+        )
+        print("매매일지 가져오는 중...")
+
+        # fetch_trading_logs 메서드를 사용하여 매매일지 가져오기
+        trading_logs = broker.fetch_trading_logs()
+
+        if trading_logs is not None:
+            print("매매일지 데이터:", trading_logs)  # 출력해 보기
+        else:
+            print("매매일지 데이터를 가져오지 못했습니다.")
+
+        # 매매일지가 없을 경우에 대비하여 빈 리스트를 전달
+        if trading_logs is None:
+            trading_logs = []
+
+        # 템플릿에 매매일지 데이터를 전달
+        return render(request, 'your_template.html', {'trading_logs': trading_logs})
+
+    except Exception as e:
+        print(f"매매일지를 가져오는 중 오류 발생: {e}")
+        return render(request, 'your_template.html', {'trading_logs': []})
